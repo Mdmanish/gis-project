@@ -46,6 +46,7 @@ To run this project locally, follow these steps:
 6. Run migrations:
 
     ```bash
+    python manage.py makemigrations
     python manage.py migrate
     ```
 
