@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GIS Project</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            align-items: center;
+            text-align: center;
+        }
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            margin: auto;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            text-align: center;
+        }
+
+        #map {
+            width: 90%;
+            height: 80vh;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>GIS Project</h1>
+    
+    <table>
+        <h2>List of Locations</h2>
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for location in locations %}
+            <tr>
+                <td>{{ location.id }}</td>
+                <td>{{ location.name }}</td>
+                <td>{{ location.description }}</td>
+                <td>{{ location.coordinates }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table>
+        <h2>List of Boundaries</h2>
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>Name</th>
+                <th>Area</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for boundary in boundaries %}
+            <tr>
+                <td>{{ boundary.id }}</td>
+                <td>{{ boundary.name }}</td>
+                <td>{{ boundary.area }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br><br>
+
+    <div id="map">
+
+    </div>
+    <br><br>
+
+    <div style="display: flex; flex-direction: row; justify-content: space-around; text-align: left;">
+        <div>
+            <h3>Calculate Distance</h3>
+            <label for="location1">Location1</label>
+            <select id="location1"></select>
+            <label for="location2">Location2</label>
+            <select id="location2"></select>
+            <br><br>
+            <button id="calculateDistance" style="display: inline-block;">Calculate Distance</button>
+            <p id="distanceResult" style="display: inline-block; margin-left: 5%"></p>
+        </div>
+
+        <div>
+            <h3>Check Boundary Inclusion</h3>
+            <label for="location">Location</label>
+            <select id="location"></select>
+            <label for="boundary">Boundary</label>
+            <select id="boundary"></select>
+            <br><br>
+            <button id="checkBoundary" style="display: inline-block;">Check Boundary</button>
+            <p id="boundaryResult" style="display: inline-block; margin-left: 5%"></p>
+        </div>
+    </div>
+    <br><br>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="text/javascript">
+    // map initialization
+    var map = L.map('map').setView([51.505, -0.09], 2);
+
+    // osm layer
+    var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+    osm.addTo(map);
+
+    var locations = `{{ locations_json|escapejs }}`;
+    locations = JSON.parse(locations);
+    var boundaries = `{{ boundaries_json|escapejs }}`;
+    boundaries = JSON.parse(boundaries);
+
+    function extractCoordinates(coordString) {
+        const regex = /POINT \(([-\d.]+) ([-\d.]+)\)/;
+        const match = coordString.match(regex);
+        if (match) {
+            return {
+                longitude: parseFloat(match[1]),
+                latitude: parseFloat(match[2])
+            };
+        }
+        return null;
+    }
+
+    locations.forEach(function(location) {
+        const coordinates = extractCoordinates(location.coordinates);
+        if (coordinates) {
+            L.marker([coordinates.latitude, coordinates.longitude])
+                .addTo(map)
+                .bindPopup(location.name);
+        } else {
+            console.error('Invalid coordinates for location:', location);
+        }
+    });
+
+    // Populate location and boundary dropdowns
+    locations.forEach(function(location) {
+        $('#location1, #location2, #location').append(new Option(location.name, location.id));
+    });
+    boundaries.forEach(function(boundary) {
+        $('#boundary').append(new Option(boundary.name, boundary.id));
+    });
+
+    // Calculate distance between two locations
+    $('#calculateDistance').click(function() {
+        var loc1 = $('#location1').val();
+        var loc2 = $('#location2').val();
+        $.post({
+            url: 'http://127.0.0.1:8000/api/locations/distance/',
+            data: {
+                location1_id: loc1,
+                location2_id: loc2,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data) {
+                $('#distanceResult').text('Distance: ' + data.distance + ' degrees');
+            },
+            error: function(xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    });
+
+    // Check if a location is within a boundary
+    $('#checkBoundary').click(function() {
+        var loc = $('#location').val();
+        var bnd = $('#boundary').val();
+        $.post({
+            url: 'http://127.0.0.1:8000/api/locations/within_boundary/',
+            data: {
+                location_id: loc,
+                boundary_id: bnd,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data) {
+                $('#boundaryResult').text(data.is_within ? 'Location is within the boundary' : 'Location is outside the boundary');
+            },
+            error: function(xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

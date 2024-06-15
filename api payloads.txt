@@ -1,0 +1,51 @@
+
+# distance between two locations
+{
+	"location1": [78.042155, 27.175015],
+	"location2": [77.185455, 28.524428]
+}
+
+
+# within boundary
+{
+	"location": [78.042155, 27.175015],
+	"boundary": {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [78.030155, 27.180015],
+                [78.030155, 27.170015],
+                [78.050155, 27.170015],
+                [78.050155, 27.180015],
+                [78.030155, 27.180015]
+            ]
+        ]
+    }
+}
+
+# create boundries
+{
+    "name": "Agra District",
+    "area": {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [78.030155, 27.180015],
+                [78.030155, 27.170015],
+                [78.050155, 27.170015],
+                [78.050155, 27.180015],
+                [78.030155, 27.180015]
+            ]
+        ]
+    }
+}
+
+# create location
+{
+    "name": "Central Park",
+    "description": "A large public park in New York City.",
+    "coordinates": {
+        "type": "Point",
+        "coordinates": [-73.9712, 40.7831]
+    }
+}
