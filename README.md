@@ -42,6 +42,7 @@ To run this project locally, follow these steps:
     ```bash
     pip install -r requirements.txt
     ```
+    Install GDAL and update the GDAL_LIBRARY_PATH, GEOS_LIBRARY_PATH values in settings.py file
 
 6. Run migrations:
 

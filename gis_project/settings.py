@@ -16,19 +16,14 @@ load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal309.dll'
-GEOS_LIBRARY_PATH = r'C:\OSGeo4W\bin\geos_c.dll'
-# import os
-# if os.name == 'nt':
-#     import platform
-#     OSGEO4W = r"C:\OSGeo4W"
-#     if '64' in platform.architecture()[0]:
-#         OSGEO4W += "64"
-#     assert os.path.isdir(OSGEO4W), "Directory does not exist: " + OSGEO4W
-#     os.environ['OSGEO4W_ROOT'] = OSGEO4W
-#     os.environ['GDAL_DATA'] = OSGEO4W + r"\share\gdal"
-#     os.environ['PROJ_LIB'] = OSGEO4W + r"\share\proj"
-#     os.environ['PATH'] = OSGEO4W + r"\bin;" + os.environ['PATH']
+if os.name == 'nt':
+    # Windows settings
+    GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal309.dll'
+    GEOS_LIBRARY_PATH = r'C:\OSGeo4W\bin\geos_c.dll'
+else:
+    # Unix settings
+    GDAL_LIBRARY_PATH = '/usr/lib/libgdal.so'
+    GEOS_LIBRARY_PATH = '/usr/lib/libgeos_c.so'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -86,28 +81,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'gis_project.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-#         'NAME': 'indrones',
-#         'USER': 'postgres',
-#         'PASSWORD': 'admin',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
 
 DATABASES = {
     'default': {
